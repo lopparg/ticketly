@@ -79,7 +79,6 @@ public class Ticket {
 
     public void close() {
         this.status = Status.CLOSED;
-
     }
 
     public Long getId() {
