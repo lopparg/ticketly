@@ -16,6 +16,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -188,5 +189,32 @@ public class TicketIntegrationTest {
                 .andExpect(jsonPath("$.description").value("New description"))
                 .andExpect(jsonPath("$.status").value("OPEN"))
                 .andExpect(jsonPath("$.priority").value("HIGH"));
+    }
+
+    @Test
+    public void delete_ticket_by_id() throws Exception {
+        Ticket ticket = new Ticket("First ticket", "Test ticket", Priority.LOW);
+        Long ticketId = ticketRepository.save(ticket).getId();
+
+        ResultActions result = mockMvc.perform(delete("/api/tickets/{id}", ticketId)
+                .accept(MediaType.APPLICATION_JSON)
+        );
+
+        result.andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").value(ticketId))
+                .andExpect(jsonPath("$.title").value("First ticket"))
+                .andExpect(jsonPath("$.description").value("Test ticket"))
+                .andExpect(jsonPath("$.status").value("OPEN"))
+                .andExpect(jsonPath("$.priority").value("LOW"));
+
+        ResultActions result1 = mockMvc.perform(get("/api/tickets/{id}", ticketId));
+        result1.andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void expect_404_if_try_to_delete_not_existing_ticket() throws Exception {
+        ResultActions result = mockMvc.perform(get("/api/tickets/1"));
+        result.andExpect(status().isNotFound());
     }
 }

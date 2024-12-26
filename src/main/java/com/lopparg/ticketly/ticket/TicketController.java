@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -42,6 +43,17 @@ public class TicketController {
             return ticketRepository.findTicketByPriority(priority);
         }
         return (List<Ticket>) ticketRepository.findAll();
+    }
+
+    @Operation(summary = "Get all tickets")
+    @DeleteMapping(value = "/{ticketId}", produces = "application/json")
+    public Ticket deleteTicket(
+            @PathVariable Long ticketId
+    ) {
+        Ticket ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ticket not found"));
+        ticketRepository.delete(ticket);
+        return ticket;
     }
 
     @Operation(summary = "Create a ticket")
